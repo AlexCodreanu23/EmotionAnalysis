@@ -84,7 +84,7 @@ if __name__ == "__main__":
     print("Raw:", sample)
     print("Processed:", preprocess(sample))
 
-    df = pd.read_csv("sentimentdataset.csv")
+    df = pd.read_csv("data/sentimentdataset.csv")
 
     df["processed"] = df["Text"].apply(lambda x: preprocess(str(x)))
 

@@ -1,0 +1,28 @@
+# Emotion Analysis Project Requirements
+
+# Core ML
+scikit-learn>=1.0.0
+numpy>=1.21.0
+pandas>=1.3.0
+
+# NLP
+spacy>=3.0.0
+nltk>=3.6.0
+gensim>=4.0.0  # For word embeddings
+nrclex>=3.0.0  # NRC Emotion Lexicon
+
+# Visualization
+matplotlib>=3.4.0
+seaborn>=0.11.0
+
+# Utilities
+joblib>=1.0.0
+tqdm>=4.62.0
+
+# Optional: For more advanced models
+# tensorflow>=2.8.0
+# torch>=1.10.0
+# transformers>=4.15.0  # For BERT-based models
+
+# Download spacy model after installing:
+# python -m spacy download en_core_web_sm
