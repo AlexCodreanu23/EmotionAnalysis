@@ -1,11 +1,3 @@
-"""
-Feature Extraction Module
-
-Two approaches:
-1. TF-IDF (for your colleague's model)
-2. Word Embeddings - Word2Vec/GloVe (for your model)
-"""
-
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -18,17 +10,10 @@ from preprocess import preprocess_to_string, preprocess
 
 
 class TFIDFFeatureExtractor:
-    """
-    TF-IDF based feature extraction.
-    This is what your COLLEAGUE will use.
-    """
+
 
     def __init__(self, max_features: int = 5000, ngram_range: Tuple[int, int] = (1, 2)):
-        """
-        Args:
-            max_features: Maximum number of features to extract
-            ngram_range: Range of n-grams to consider
-        """
+
         self.vectorizer = TfidfVectorizer(
             max_features=max_features,
             ngram_range=ngram_range,
@@ -38,8 +23,7 @@ class TFIDFFeatureExtractor:
         self.is_fitted = False
 
     def fit(self, texts: pd.Series) -> 'TFIDFFeatureExtractor':
-        """Fit the TF-IDF vectorizer on training texts."""
-        # Preprocess texts
+
         processed = texts.apply(lambda x: preprocess_to_string(str(x)))
         self.vectorizer.fit(processed)
         self.is_fitted = True
@@ -64,23 +48,8 @@ class TFIDFFeatureExtractor:
 
 
 class EmbeddingFeatureExtractor:
-    """
-    Word Embedding based feature extraction.
-    This is what YOU will use.
-
-    Uses pre-trained Word2Vec or GloVe embeddings.
-    Document embedding = average of word embeddings.
-    """
 
     def __init__(self, model_name: str = 'glove-wiki-gigaword-100', embedding_dim: int = 100):
-        """
-        Args:
-            model_name: Name of pre-trained model from gensim
-                Options: 'glove-wiki-gigaword-50', 'glove-wiki-gigaword-100',
-                        'glove-wiki-gigaword-200', 'glove-wiki-gigaword-300',
-                        'word2vec-google-news-300'
-            embedding_dim: Dimension of embeddings (must match model)
-        """
         self.model_name = model_name
         self.embedding_dim = embedding_dim
         self.word_vectors = None
@@ -101,15 +70,6 @@ class EmbeddingFeatureExtractor:
         return None
 
     def get_document_embedding(self, tokens: list) -> np.ndarray:
-        """
-        Get document embedding as average of word embeddings.
-
-        Args:
-            tokens: List of preprocessed tokens
-
-        Returns:
-            numpy array of shape (embedding_dim,)
-        """
         if self.word_vectors is None:
             raise ValueError("Model not loaded. Call load_model() first.")
 
@@ -125,15 +85,7 @@ class EmbeddingFeatureExtractor:
             return np.zeros(self.embedding_dim)
 
     def transform(self, texts: pd.Series) -> np.ndarray:
-        """
-        Transform texts to embedding features.
 
-        Args:
-            texts: Series of raw texts
-
-        Returns:
-            numpy array of shape (n_samples, embedding_dim)
-        """
         if self.word_vectors is None:
             self.load_model()
 
@@ -149,22 +101,11 @@ class EmbeddingFeatureExtractor:
 
 
 class CombinedFeatureExtractor:
-    """
-    Combines multiple feature types:
-    - Word embeddings (or TF-IDF)
-    - Emotion scores from NRC Lexicon
 
-    This can give better results than using either alone.
-    """
 
     def __init__(self, use_embeddings: bool = True, use_emotions: bool = True,
                  embedding_model: str = 'glove-wiki-gigaword-100'):
-        """
-        Args:
-            use_embeddings: Whether to include word embeddings
-            use_emotions: Whether to include NRC emotion scores
-            embedding_model: Which embedding model to use
-        """
+
         self.use_embeddings = use_embeddings
         self.use_emotions = use_emotions
 
@@ -176,9 +117,6 @@ class CombinedFeatureExtractor:
             self.get_emotion_vector = get_emotion_vector
 
     def transform(self, texts: pd.Series) -> np.ndarray:
-        """
-        Transform texts to combined features.
-        """
         features = []
 
         if self.use_embeddings:

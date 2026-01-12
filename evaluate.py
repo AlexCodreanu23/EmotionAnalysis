@@ -1,12 +1,3 @@
-"""
-Evaluation Module for Emotion Analysis
-
-Contains:
-- ModelEvaluator class for comprehensive evaluation
-- Comparison functions between models
-- Visualization utilities
-"""
-
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
@@ -22,31 +13,17 @@ import json
 
 
 class ModelEvaluator:
-    """
-    Comprehensive model evaluation class.
-    """
 
     def __init__(self, model, model_name: str):
-        """
-        Args:
-            model: Trained model with predict() method
-            model_name: Name for display
-        """
+
         self.model = model
         self.model_name = model_name
         self.results = {}
 
     def evaluate(self, X_test: pd.Series, y_test: pd.Series) -> Dict[str, float]:
-        """
-        Run full evaluation on test set.
 
-        Returns:
-            Dictionary of metrics
-        """
-        # Predictions
         y_pred = self.model.predict(X_test)
 
-        # Basic metrics
         self.results = {
             'accuracy': accuracy_score(y_test, y_pred),
             'precision_macro': precision_score(y_test, y_pred, average='macro', zero_division=0),
@@ -82,13 +59,6 @@ class ModelEvaluator:
 
     def cross_validate(self, X: pd.Series, y: pd.Series,
                        cv: int = 5, scoring: str = 'f1_macro') -> Dict[str, float]:
-        """
-        Run cross-validation.
-
-        Returns:
-            Dictionary with mean and std of CV scores
-        """
-        # Get features
         if hasattr(self.model, 'get_features'):
             X_features = self.model.get_features(X)
         else:
@@ -108,7 +78,6 @@ class ModelEvaluator:
         }
 
     def print_report(self) -> None:
-        """Print formatted evaluation report."""
         print(f"\n{'=' * 60}")
         print(f"EVALUATION REPORT: {self.model_name}")
         print(f"{'=' * 60}")
@@ -164,16 +133,6 @@ class ModelEvaluator:
 
 def compare_models(results_list: List[Dict[str, Any]],
                    save_path: Optional[str] = None) -> pd.DataFrame:
-    """
-    Compare multiple models.
-
-    Args:
-        results_list: List of dictionaries with model results
-        save_path: Optional path to save comparison plot
-
-    Returns:
-        DataFrame with comparison
-    """
     comparison_data = []
 
     for r in results_list:
@@ -231,16 +190,7 @@ def compare_models(results_list: List[Dict[str, Any]],
 
 def statistical_significance_test(scores1: List[float], scores2: List[float],
                                   model1_name: str, model2_name: str) -> Dict[str, float]:
-    """
-    Perform paired t-test to check if difference is statistically significant.
 
-    Args:
-        scores1, scores2: Cross-validation scores for both models
-        model1_name, model2_name: Names for display
-
-    Returns:
-        Dictionary with test results
-    """
     from scipy import stats
 
     scores1 = np.array(scores1)

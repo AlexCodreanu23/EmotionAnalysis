@@ -1,12 +1,3 @@
-"""
-Emotion Scoring Module using NRC Emotion Lexicon
-
-This module uses the NRCLex library to extract Plutchik's 8 basic emotions:
-- anger, anticipation, disgust, fear, joy, sadness, surprise, trust
-
-Plus positive/negative sentiment scores.
-"""
-
 import pandas as pd
 import numpy as np
 from nrclex import NRCLex
@@ -24,17 +15,7 @@ ALL_NRC_CATEGORIES = PLUTCHIK_EMOTIONS + ['positive', 'negative']
 
 
 def get_emotion_scores(text: str, normalize: bool = True) -> dict:
-    """
-    Extract emotion scores for a single text using NRC Lexicon.
 
-    Args:
-        text: Input text string
-        normalize: If True, normalize scores by total emotion words
-
-    Returns:
-        Dictionary with emotion scores
-    """
-    # Create NRCLex object
     emotion = NRCLex(text)
 
     # Get raw frequencies
@@ -58,12 +39,7 @@ def get_emotion_scores(text: str, normalize: bool = True) -> dict:
 
 
 def get_dominant_emotion(text: str) -> str:
-    """
-    Get the dominant Plutchik emotion for a text.
 
-    Returns:
-        Name of the emotion with highest score, or 'neutral' if no emotions detected
-    """
     scores = get_emotion_scores(text, normalize=False)
 
     # Only consider Plutchik emotions (not positive/negative)
@@ -76,16 +52,6 @@ def get_dominant_emotion(text: str) -> str:
 
 
 def extract_emotion_features(df: pd.DataFrame, text_column: str = 'Text') -> pd.DataFrame:
-    """
-    Extract emotion features for entire DataFrame.
-
-    Args:
-        df: DataFrame with text data
-        text_column: Name of column containing text
-
-    Returns:
-        DataFrame with added emotion score columns
-    """
     print(f"Extracting emotion features for {len(df)} texts...")
 
     # Initialize lists to store results
@@ -120,33 +86,17 @@ def extract_emotion_features(df: pd.DataFrame, text_column: str = 'Text') -> pd.
 
 
 def create_emotion_labels(df: pd.DataFrame, text_column: str = 'Text') -> pd.DataFrame:
-    """
-    Create emotion labels for supervised learning.
-    Uses dominant emotion as the label.
-
-    Returns DataFrame with 'emotion_label' column.
-    """
     df = df.copy()
     df['emotion_label'] = df[text_column].apply(lambda x: get_dominant_emotion(str(x)))
     return df
 
 
 def get_emotion_vector(text: str) -> np.ndarray:
-    """
-    Get emotion scores as a numpy vector.
-    Useful for ML models.
-
-    Returns:
-        numpy array of shape (10,) with emotion scores
-    """
     scores = get_emotion_scores(text, normalize=True)
     return np.array([scores[cat] for cat in ALL_NRC_CATEGORIES])
 
 
 def analyze_text_emotions(text: str) -> None:
-    """
-    Print detailed emotion analysis for a single text.
-    """
     print(f"\nText: {text[:100]}..." if len(text) > 100 else f"\nText: {text}")
     print("-" * 50)
 

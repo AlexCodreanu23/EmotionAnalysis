@@ -61,11 +61,7 @@ def remove_stopwords(tokens):
 def preprocess(text: str,
                remove_sw=True,
                remove_emojis=False) -> list:
-    """
-    Full preprocessing pipeline:
-    - normalize → noise removal → tokenize → lemmatize → stopword removal
-    Returns a list of clean tokens.
-    """
+
 
     text = normalize_text(text)
     text = remove_noise(text, remove_emojis)

@@ -1,12 +1,3 @@
-"""
-Simple Demo Script - Test without downloading large embeddings
-
-This script demonstrates:
-1. Preprocessing
-2. Emotion scoring with NRC Lexicon
-3. TF-IDF model training (no downloads required)
-"""
-
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -15,7 +6,6 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-# Import our modules
 from preprocess import preprocess, preprocess_to_string
 from emotion_scoring import (
     get_emotion_scores,
@@ -28,7 +18,6 @@ from sklearn.linear_model import LogisticRegression
 
 
 def demo_preprocessing():
-    """Demonstrate preprocessing pipeline."""
     print("=" * 60)
     print("1. PREPROCESSING DEMO")
     print("=" * 60)
@@ -64,7 +53,6 @@ def demo_emotion_scoring():
 
 
 def demo_tfidf_model():
-    """Demonstrate TF-IDF model (your colleague's model)."""
     print("\n" + "=" * 60)
     print("3. TF-IDF MODEL DEMO (Colleague's Model)")
     print("=" * 60)
@@ -128,7 +116,6 @@ def demo_tfidf_model():
 
 
 def demo_emotion_features_model():
-    """Demonstrate model using emotion features directly."""
     print("\n" + "=" * 60)
     print("4. EMOTION FEATURES MODEL DEMO")
     print("=" * 60)

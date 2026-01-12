@@ -1,12 +1,3 @@
-"""
-Main Training Script for Emotion Analysis
-
-This script:
-1. Loads and preprocesses data
-2. Creates emotion labels using NRC Lexicon
-3. Trains both models (yours and colleague's)
-4. Evaluates and compares them
-"""
 
 import pandas as pd
 import numpy as np
@@ -24,9 +15,7 @@ from evaluate import ModelEvaluator, compare_models
 
 
 def load_and_prepare_data(filepath: str) -> pd.DataFrame:
-    """
-    Load dataset and prepare it for training.
-    """
+
     print("=" * 60)
     print("LOADING DATA")
     print("=" * 60)
@@ -46,9 +35,6 @@ def load_and_prepare_data(filepath: str) -> pd.DataFrame:
 
 
 def create_emotion_dataset(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Create emotion labels using NRC Lexicon.
-    """
     print("\n" + "=" * 60)
     print("CREATING EMOTION LABELS")
     print("=" * 60)
@@ -67,10 +53,7 @@ def create_emotion_dataset(df: pd.DataFrame) -> pd.DataFrame:
 
 def train_tfidf_model(X_train: pd.Series, y_train: pd.Series,
                       X_test: pd.Series, y_test: pd.Series) -> dict:
-    """
-    Train and evaluate TF-IDF + Logistic Regression model.
-    This is your COLLEAGUE's model.
-    """
+
     print("\n" + "=" * 60)
     print("COLLEAGUE'S MODEL: TF-IDF + Logistic Regression")
     print("=" * 60)
@@ -108,10 +91,7 @@ def train_tfidf_model(X_train: pd.Series, y_train: pd.Series,
 def train_embedding_model(X_train: pd.Series, y_train: pd.Series,
                           X_test: pd.Series, y_test: pd.Series,
                           include_emotions: bool = True) -> dict:
-    """
-    Train and evaluate Word Embedding + Logistic Regression model.
-    This is YOUR model.
-    """
+
     print("\n" + "=" * 60)
     print("YOUR MODEL: Word Embeddings + Logistic Regression")
     if include_emotions:
@@ -157,9 +137,7 @@ def train_embedding_model(X_train: pd.Series, y_train: pd.Series,
 
 
 def visualize_results(results: list, y_test: pd.Series, save_path: str = None):
-    """
-    Create visualization of model comparison results.
-    """
+
     print("\n" + "=" * 60)
     print("VISUALIZING RESULTS")
     print("=" * 60)
@@ -248,20 +226,13 @@ def main():
     TEST_SIZE = 0.2
     RANDOM_STATE = 42
 
-    # 1. Load data
     df = load_and_prepare_data(DATA_PATH)
 
-    # 2. Create emotion labels
     df = create_emotion_dataset(df)
 
-    # 3. Prepare features and labels
     X = df['Text']
     y = df['dominant_emotion']
 
-    # Filter out 'neutral' if too many samples (optional)
-    # df = df[df['dominant_emotion'] != 'neutral']
-
-    # 4. Train/test split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=y
     )
@@ -271,11 +242,9 @@ def main():
     # 5. Train models
     results = []
 
-    # Colleague's model: TF-IDF
     tfidf_results = train_tfidf_model(X_train, y_train, X_test, y_test)
     results.append(tfidf_results)
 
-    # Your model: Embeddings (this will download GloVe vectors - ~100MB)
     print("\n[Note: First run will download GloVe embeddings (~100MB)]")
     embedding_results = train_embedding_model(
         X_train, y_train, X_test, y_test,
@@ -283,7 +252,6 @@ def main():
     )
     results.append(embedding_results)
 
-    # 6. Compare models
     print("\n" + "=" * 60)
     print("FINAL COMPARISON")
     print("=" * 60)

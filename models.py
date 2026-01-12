@@ -1,3 +1,11 @@
+"""
+Models Module
+
+Contains two model implementations:
+1. YOUR MODEL: Logistic Regression + Word Embeddings (+ optional emotion features)
+2. COLLEAGUE'S MODEL: Logistic Regression + TF-IDF
+"""
+
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -52,7 +60,84 @@ class BaseEmotionClassifier:
         self.is_fitted = True
         print(f"Model loaded from {filepath}")
 
+
+class TFIDFLogisticClassifier(BaseEmotionClassifier):
+    """
+    COLLEAGUE'S MODEL
+
+    TF-IDF features + Logistic Regression
+    Simple but effective baseline.
+    """
+
+    def __init__(self, max_features: int = 5000, C: float = 1.0):
+        """
+        Args:
+            max_features: Max TF-IDF features
+            C: Regularization strength for Logistic Regression
+        """
+        super().__init__(name="TF-IDF + Logistic Regression")
+
+        self.feature_extractor = TFIDFFeatureExtractor(max_features=max_features)
+        self.model = LogisticRegression(
+            C=C,
+            max_iter=1000,
+            multi_class='multinomial',
+            solver='lbfgs',
+            random_state=42
+        )
+
+    def fit(self, texts: pd.Series, labels: pd.Series) -> 'TFIDFLogisticClassifier':
+        """
+        Train the model.
+
+        Args:
+            texts: Series of raw text data
+            labels: Series of emotion labels
+        """
+        print(f"Training {self.name}...")
+
+        # Extract features
+        X = self.feature_extractor.fit_transform(texts)
+        y = self.encode_labels(labels)
+
+        # Train model
+        self.model.fit(X, y)
+        self.is_fitted = True
+
+        print(f"Training complete! Classes: {self.get_classes()}")
+        return self
+
+    def predict(self, texts: pd.Series) -> np.ndarray:
+        """Predict emotion labels for texts."""
+        if not self.is_fitted:
+            raise ValueError("Model not trained. Call fit() first.")
+
+        X = self.feature_extractor.transform(texts)
+        y_pred = self.model.predict(X)
+        return self.decode_labels(y_pred)
+
+    def predict_proba(self, texts: pd.Series) -> np.ndarray:
+        """Get prediction probabilities."""
+        if not self.is_fitted:
+            raise ValueError("Model not trained. Call fit() first.")
+
+        X = self.feature_extractor.transform(texts)
+        return self.model.predict_proba(X)
+
+    def get_features(self, texts: pd.Series) -> np.ndarray:
+        """Get TF-IDF features for texts."""
+        if not self.feature_extractor.is_fitted:
+            raise ValueError("Feature extractor not fitted.")
+        return self.feature_extractor.transform(texts)
+
+
 class EmbeddingLogisticClassifier(BaseEmotionClassifier):
+    """
+    YOUR MODEL
+
+    Word Embeddings (GloVe/Word2Vec) + Logistic Regression
+    Can optionally include emotion features from NRC Lexicon.
+    """
 
     def __init__(self, embedding_model: str = 'glove-wiki-gigaword-100',
                  include_emotions: bool = True, C: float = 1.0):
@@ -146,7 +231,9 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
 
 # Alternative models you could also try
 class AlternativeModels:
-
+    """
+    Collection of alternative classifiers you could experiment with.
+    """
 
     @staticmethod
     def get_svm(C: float = 1.0):
