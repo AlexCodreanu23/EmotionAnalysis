@@ -1,11 +1,3 @@
-"""
-Models Module
-
-Contains two model implementations:
-1. YOUR MODEL: Logistic Regression + Word Embeddings (+ optional emotion features)
-2. COLLEAGUE'S MODEL: Logistic Regression + TF-IDF
-"""
-
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -22,7 +14,7 @@ from feature_extraction import TFIDFFeatureExtractor, EmbeddingFeatureExtractor
 
 
 class BaseEmotionClassifier:
-    """Base class for emotion classifiers."""
+
 
     def __init__(self, name: str):
         self.name = name
@@ -62,19 +54,10 @@ class BaseEmotionClassifier:
 
 
 class TFIDFLogisticClassifier(BaseEmotionClassifier):
-    """
-    COLLEAGUE'S MODEL
 
-    TF-IDF features + Logistic Regression
-    Simple but effective baseline.
-    """
 
     def __init__(self, max_features: int = 5000, C: float = 1.0):
-        """
-        Args:
-            max_features: Max TF-IDF features
-            C: Regularization strength for Logistic Regression
-        """
+
         super().__init__(name="TF-IDF + Logistic Regression")
 
         self.feature_extractor = TFIDFFeatureExtractor(max_features=max_features)
@@ -87,13 +70,7 @@ class TFIDFLogisticClassifier(BaseEmotionClassifier):
         )
 
     def fit(self, texts: pd.Series, labels: pd.Series) -> 'TFIDFLogisticClassifier':
-        """
-        Train the model.
 
-        Args:
-            texts: Series of raw text data
-            labels: Series of emotion labels
-        """
         print(f"Training {self.name}...")
 
         # Extract features
@@ -132,21 +109,11 @@ class TFIDFLogisticClassifier(BaseEmotionClassifier):
 
 
 class EmbeddingLogisticClassifier(BaseEmotionClassifier):
-    """
-    YOUR MODEL
 
-    Word Embeddings (GloVe/Word2Vec) + Logistic Regression
-    Can optionally include emotion features from NRC Lexicon.
-    """
 
     def __init__(self, embedding_model: str = 'glove-wiki-gigaword-100',
                  include_emotions: bool = True, C: float = 1.0):
-        """
-        Args:
-            embedding_model: Pre-trained embedding model name
-            include_emotions: Whether to include NRC emotion scores as features
-            C: Regularization strength for Logistic Regression
-        """
+
         super().__init__(name="Word Embeddings + Logistic Regression")
 
         self.include_emotions = include_emotions
@@ -181,13 +148,6 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
         return emb_features
 
     def fit(self, texts: pd.Series, labels: pd.Series) -> 'EmbeddingLogisticClassifier':
-        """
-        Train the model.
-
-        Args:
-            texts: Series of raw text data
-            labels: Series of emotion labels
-        """
         print(f"Training {self.name}...")
 
         # Load embeddings if not loaded
@@ -231,10 +191,6 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
 
 # Alternative models you could also try
 class AlternativeModels:
-    """
-    Collection of alternative classifiers you could experiment with.
-    """
-
     @staticmethod
     def get_svm(C: float = 1.0):
         """Support Vector Machine classifier."""
