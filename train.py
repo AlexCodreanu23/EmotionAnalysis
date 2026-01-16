@@ -58,14 +58,11 @@ def train_tfidf_model(X_train: pd.Series, y_train: pd.Series,
     print("COLLEAGUE'S MODEL: TF-IDF + Logistic Regression")
     print("=" * 60)
 
-    # Train model
     model = TFIDFLogisticClassifier(max_features=3000, C=1.0)
     model.fit(X_train, y_train)
 
-    # Predict
     y_pred = model.predict(X_test)
 
-    # Evaluate
     accuracy = accuracy_score(y_test, y_pred)
     f1_macro = f1_score(y_test, y_pred, average='macro')
     f1_weighted = f1_score(y_test, y_pred, average='weighted')
@@ -239,7 +236,6 @@ def main():
 
     print(f"\nTrain size: {len(X_train)}, Test size: {len(X_test)}")
 
-    # 5. Train models
     results = []
 
     tfidf_results = train_tfidf_model(X_train, y_train, X_test, y_test)
@@ -266,10 +262,8 @@ def main():
             r['name'], r['accuracy'], r['f1_macro'], r['f1_weighted']
         ))
 
-    # 7. Visualize
     visualize_results(results, y_test, save_path='results/model_comparison.png')
 
-    # 8. Save models
     print("\nSaving models...")
     results[0]['model'].save('results/tfidf_model.joblib')
     results[1]['model'].save('results/embedding_model.joblib')

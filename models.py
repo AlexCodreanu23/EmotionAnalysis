@@ -15,7 +15,6 @@ from feature_extraction import TFIDFFeatureExtractor, EmbeddingFeatureExtractor
 
 class BaseEmotionClassifier:
 
-
     def __init__(self, name: str):
         self.name = name
         self.model = None
@@ -23,19 +22,15 @@ class BaseEmotionClassifier:
         self.is_fitted = False
 
     def encode_labels(self, labels: pd.Series) -> np.ndarray:
-        """Encode string labels to integers."""
         return self.label_encoder.fit_transform(labels)
 
     def decode_labels(self, encoded: np.ndarray) -> np.ndarray:
-        """Decode integer labels back to strings."""
         return self.label_encoder.inverse_transform(encoded)
 
     def get_classes(self) -> list:
-        """Get list of class labels."""
         return self.label_encoder.classes_.tolist()
 
     def save(self, filepath: str) -> None:
-        """Save model to file."""
         joblib.dump({
             'model': self.model,
             'label_encoder': self.label_encoder,
@@ -44,7 +39,6 @@ class BaseEmotionClassifier:
         print(f"Model saved to {filepath}")
 
     def load(self, filepath: str) -> None:
-        """Load model from file."""
         data = joblib.load(filepath)
         self.model = data['model']
         self.label_encoder = data['label_encoder']
@@ -54,17 +48,12 @@ class BaseEmotionClassifier:
 
 
 class TFIDFLogisticClassifier(BaseEmotionClassifier):
-
-
     def __init__(self, max_features: int = 5000, C: float = 1.0):
-
         super().__init__(name="TF-IDF + Logistic Regression")
-
         self.feature_extractor = TFIDFFeatureExtractor(max_features=max_features)
         self.model = LogisticRegression(
-            C=C,
+            C=0.5,
             max_iter=1000,
-            multi_class='multinomial',
             solver='lbfgs',
             random_state=42
         )
@@ -85,7 +74,6 @@ class TFIDFLogisticClassifier(BaseEmotionClassifier):
         return self
 
     def predict(self, texts: pd.Series) -> np.ndarray:
-        """Predict emotion labels for texts."""
         if not self.is_fitted:
             raise ValueError("Model not trained. Call fit() first.")
 
@@ -102,15 +90,11 @@ class TFIDFLogisticClassifier(BaseEmotionClassifier):
         return self.model.predict_proba(X)
 
     def get_features(self, texts: pd.Series) -> np.ndarray:
-        """Get TF-IDF features for texts."""
         if not self.feature_extractor.is_fitted:
             raise ValueError("Feature extractor not fitted.")
         return self.feature_extractor.transform(texts)
 
-
 class EmbeddingLogisticClassifier(BaseEmotionClassifier):
-
-
     def __init__(self, embedding_model: str = 'glove-wiki-gigaword-100',
                  include_emotions: bool = True, C: float = 1.0):
 
@@ -124,7 +108,6 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
         self.model = LogisticRegression(
             C=C,
             max_iter=1000,
-            multi_class='multinomial',
             solver='lbfgs',
             random_state=42
         )
@@ -134,12 +117,11 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
             self.get_emotion_vector = get_emotion_vector
 
     def _extract_features(self, texts: pd.Series) -> np.ndarray:
-        """Extract combined features."""
-        # Get embedding features
+
         emb_features = self.feature_extractor.transform(texts)
 
         if self.include_emotions:
-            # Add emotion features
+
             emotion_features = np.array([
                 self.get_emotion_vector(str(t)) for t in texts
             ])
@@ -150,17 +132,14 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
     def fit(self, texts: pd.Series, labels: pd.Series) -> 'EmbeddingLogisticClassifier':
         print(f"Training {self.name}...")
 
-        # Load embeddings if not loaded
         if self.feature_extractor.word_vectors is None:
             self.feature_extractor.load_model()
 
-        # Extract features
         X = self._extract_features(texts)
         y = self.encode_labels(labels)
 
         print(f"Feature shape: {X.shape}")
 
-        # Train model
         self.model.fit(X, y)
         self.is_fitted = True
 
@@ -168,7 +147,6 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
         return self
 
     def predict(self, texts: pd.Series) -> np.ndarray:
-        """Predict emotion labels for texts."""
         if not self.is_fitted:
             raise ValueError("Model not trained. Call fit() first.")
 
@@ -177,7 +155,6 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
         return self.decode_labels(y_pred)
 
     def predict_proba(self, texts: pd.Series) -> np.ndarray:
-        """Get prediction probabilities."""
         if not self.is_fitted:
             raise ValueError("Model not trained. Call fit() first.")
 
@@ -185,20 +162,18 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
         return self.model.predict_proba(X)
 
     def get_features(self, texts: pd.Series) -> np.ndarray:
-        """Get combined features for texts."""
         return self._extract_features(texts)
 
 
-# Alternative models you could also try
 class AlternativeModels:
+
+
     @staticmethod
     def get_svm(C: float = 1.0):
-        """Support Vector Machine classifier."""
         return SVC(C=C, kernel='rbf', probability=True, random_state=42)
 
     @staticmethod
     def get_random_forest(n_estimators: int = 100):
-        """Random Forest classifier."""
         return RandomForestClassifier(
             n_estimators=n_estimators,
             max_depth=10,
@@ -207,7 +182,6 @@ class AlternativeModels:
 
     @staticmethod
     def get_mlp(hidden_layers: tuple = (100, 50)):
-        """Multi-layer Perceptron (simple neural network)."""
         return MLPClassifier(
             hidden_layer_sizes=hidden_layers,
             max_iter=500,
@@ -216,12 +190,10 @@ class AlternativeModels:
 
 
 if __name__ == "__main__":
-    # Quick demo
     print("=" * 60)
     print("MODELS DEMO")
     print("=" * 60)
 
-    # Sample data
     texts = pd.Series([
         "I am so happy and excited!",
         "This makes me angry!",
@@ -232,7 +204,6 @@ if __name__ == "__main__":
     ])
     labels = pd.Series(['joy', 'anger', 'fear', 'surprise', 'sadness', 'trust'])
 
-    # Test TF-IDF model (colleague's model)
     print("\n1. Testing TF-IDF + Logistic Regression:")
     tfidf_model = TFIDFLogisticClassifier(max_features=100)
     tfidf_model.fit(texts, labels)

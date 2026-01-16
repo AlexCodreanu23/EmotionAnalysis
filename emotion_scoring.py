@@ -4,13 +4,12 @@ from nrclex import NRCLex
 from collections import defaultdict
 from preprocess import preprocess_to_string, preprocess
 
-# Plutchik's 8 basic emotions
+
 PLUTCHIK_EMOTIONS = [
     'anger', 'anticipation', 'disgust', 'fear',
     'joy', 'sadness', 'surprise', 'trust'
 ]
 
-# All NRC categories (emotions + sentiment)
 ALL_NRC_CATEGORIES = PLUTCHIK_EMOTIONS + ['positive', 'negative']
 
 
@@ -18,18 +17,14 @@ def get_emotion_scores(text: str, normalize: bool = True) -> dict:
 
     emotion = NRCLex(text)
 
-    # Get raw frequencies
     raw_scores = emotion.raw_emotion_scores
 
-    # Initialize all emotions to 0
     scores = {emo: 0.0 for emo in ALL_NRC_CATEGORIES}
 
-    # Update with actual scores
     for emo, count in raw_scores.items():
         if emo in scores:
             scores[emo] = count
 
-    # Normalize if requested
     if normalize:
         total = sum(scores.values())
         if total > 0:
@@ -42,7 +37,6 @@ def get_dominant_emotion(text: str) -> str:
 
     scores = get_emotion_scores(text, normalize=False)
 
-    # Only consider Plutchik emotions (not positive/negative)
     emotion_scores = {k: v for k, v in scores.items() if k in PLUTCHIK_EMOTIONS}
 
     if sum(emotion_scores.values()) == 0:

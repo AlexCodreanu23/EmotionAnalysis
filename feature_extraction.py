@@ -13,12 +13,13 @@ class TFIDFFeatureExtractor:
 
 
     def __init__(self, max_features: int = 5000, ngram_range: Tuple[int, int] = (1, 2)):
-
         self.vectorizer = TfidfVectorizer(
             max_features=max_features,
             ngram_range=ngram_range,
-            min_df=2,  # Ignore terms that appear in fewer than 2 documents
-            max_df=0.95  # Ignore terms that appear in more than 95% of documents
+            min_df=5,
+            max_df=0.85,
+            sublinear_tf=True,
+            use_idf=True
         )
         self.is_fitted = False
 
@@ -30,20 +31,17 @@ class TFIDFFeatureExtractor:
         return self
 
     def transform(self, texts: pd.Series) -> np.ndarray:
-        """Transform texts to TF-IDF features."""
         if not self.is_fitted:
             raise ValueError("Vectorizer not fitted. Call fit() first.")
         processed = texts.apply(lambda x: preprocess_to_string(str(x)))
         return self.vectorizer.transform(processed).toarray()
 
     def fit_transform(self, texts: pd.Series) -> np.ndarray:
-        """Fit and transform texts to TF-IDF features."""
         processed = texts.apply(lambda x: preprocess_to_string(str(x)))
         self.is_fitted = True
         return self.vectorizer.fit_transform(processed).toarray()
 
     def get_feature_names(self) -> list:
-        """Get feature names (vocabulary)."""
         return self.vectorizer.get_feature_names_out().tolist()
 
 
@@ -55,13 +53,11 @@ class EmbeddingFeatureExtractor:
         self.word_vectors = None
 
     def load_model(self) -> None:
-        """Load pre-trained word vectors."""
         print(f"Loading {self.model_name}... (this may take a while on first run)")
         self.word_vectors = api.load(self.model_name)
         print(f"Loaded! Vocabulary size: {len(self.word_vectors)}")
 
     def get_word_embedding(self, word: str) -> Optional[np.ndarray]:
-        """Get embedding for a single word."""
         if self.word_vectors is None:
             raise ValueError("Model not loaded. Call load_model() first.")
 
@@ -134,7 +130,6 @@ class CombinedFeatureExtractor:
 
 
 if __name__ == "__main__":
-    # Test feature extractors
     test_texts = pd.Series([
         "I am so happy and excited about this wonderful news!",
         "This makes me really angry and frustrated!",
@@ -146,7 +141,6 @@ if __name__ == "__main__":
     print("FEATURE EXTRACTION DEMO")
     print("=" * 60)
 
-    # Test TF-IDF
     print("\n1. TF-IDF Features:")
     tfidf = TFIDFFeatureExtractor(max_features=100)
     tfidf_features = tfidf.fit_transform(test_texts)
