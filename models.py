@@ -165,6 +165,71 @@ class EmbeddingLogisticClassifier(BaseEmotionClassifier):
         return self._extract_features(texts)
 
 
+class MLPNeuralNetworkClassifier(BaseEmotionClassifier):
+
+    def __init__(self, max_features: int = 5000, hidden_layers: tuple = (256, 128, 64),
+                 learning_rate: float = 0.001, max_iter: int = 500):
+        super().__init__(name="MLP Neural Network")
+
+        self.feature_extractor = TFIDFFeatureExtractor(max_features=max_features)
+        self.model = MLPClassifier(
+            hidden_layer_sizes=hidden_layers,
+            activation='relu',
+            solver='adam',
+            learning_rate_init=learning_rate,
+            max_iter=max_iter,
+            early_stopping=True,
+            validation_fraction=0.1,
+            n_iter_no_change=10,
+            random_state=42,
+            verbose=False
+        )
+        self.hidden_layers = hidden_layers
+
+    def fit(self, texts: pd.Series, labels: pd.Series) -> 'MLPNeuralNetworkClassifier':
+        print(f"Training {self.name}...")
+        print(f"  Architecture: Input → {' → '.join(map(str, self.hidden_layers))} → Output")
+
+        X = self.feature_extractor.fit_transform(texts)
+        y = self.encode_labels(labels)
+
+        print(f"  Input features: {X.shape[1]}")
+        print(f"  Training samples: {X.shape[0]}")
+
+        self.model.fit(X, y)
+        self.is_fitted = True
+
+        print(f"  Training iterations: {self.model.n_iter_}")
+        print(f"  Final loss: {self.model.loss_:.4f}")
+        print(f"Training complete! Classes: {self.get_classes()}")
+        return self
+
+    def predict(self, texts: pd.Series) -> np.ndarray:
+        if not self.is_fitted:
+            raise ValueError("Model not trained. Call fit() first.")
+
+        X = self.feature_extractor.transform(texts)
+        y_pred = self.model.predict(X)
+        return self.decode_labels(y_pred)
+
+    def predict_proba(self, texts: pd.Series) -> np.ndarray:
+        if not self.is_fitted:
+            raise ValueError("Model not trained. Call fit() first.")
+
+        X = self.feature_extractor.transform(texts)
+        return self.model.predict_proba(X)
+
+    def get_features(self, texts: pd.Series) -> np.ndarray:
+        if not self.feature_extractor.is_fitted:
+            raise ValueError("Feature extractor not fitted.")
+        return self.feature_extractor.transform(texts)
+
+    def get_training_curve(self) -> list:
+        if hasattr(self.model, 'loss_curve_'):
+            return self.model.loss_curve_
+        return []
+
+
 class AlternativeModels:
 
 
